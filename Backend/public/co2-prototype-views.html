@@ -1,0 +1,155 @@
+<!doctype html>
+<html lang="es">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>CO₂ Prototype - Vistas de prueba</title>
+  <style>
+    body{font-family:Inter,system-ui,Segoe UI,Arial;margin:24px;background:#f7fafc;color:#111}
+    .card{background:#fff;border-radius:12px;box-shadow:0 6px 18px rgba(15,23,42,0.06);padding:18px;margin-bottom:18px}
+    h1{font-size:20px;margin-bottom:6px}
+    label{display:block;margin:8px 0 4px;font-weight:600}
+    input[type=text], input[type=number], textarea{width:100%;padding:10px;border:1px solid #e2e8f0;border-radius:8px}
+    button{padding:10px 14px;border-radius:8px;border:0;background:#0ea5a4;color:#fff;font-weight:700;cursor:pointer}
+    pre{background:#0f172a;color:#fff;padding:12px;border-radius:8px;overflow:auto}
+    .row{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+    @media(max-width:760px){.row{grid-template-columns:1fr}}
+  </style>
+</head>
+<body>
+  <div class="card">
+    <h1>CO₂ Prototype — Vistas de prueba</h1>
+    <p>3 vistas para probar localmente tu backend (sitio, archivo y email). Asegúrate de tener el servidor Express corriendo en <code>http://localhost:3000</code> y con CORS habilitado.</p>
+  </div>
+
+  <div class="row">
+    <!-- Vista 1: URL -->
+    <div class="card">
+      <h2>1) Medir sitio web (URL)</h2>
+      <label for="urlInput">URL</label>
+      <input id="urlInput" type="text" placeholder="https://www.example.com" value="https://www.wikipedia.org">
+      <label for="visitasInput">Visitas (opcional)</label>
+      <input id="visitasInput" type="number" placeholder="1000" value="1000">
+      <div style="margin-top:10px">
+        <button id="btnUrl">Calcular huella por URL</button>
+      </div>
+      <h3>Resultado</h3>
+      <pre id="resultUrl">—</pre>
+    </div>
+
+    <!-- Vista 2: Archivo -->
+    <div class="card">
+      <h2>2) Medir archivo (upload)</h2>
+      <label for="fileInput">Selecciona un archivo</label>
+      <input id="fileInput" type="file">
+      <label for="fileCount">Cantidad de envíos/descargas (opcional)</label>
+      <input id="fileCount" type="number" placeholder="1" value="1">
+      <div style="margin-top:10px">
+        <button id="btnFile">Subir y calcular</button>
+      </div>
+      <h3>Resultado</h3>
+      <pre id="resultFile">—</pre>
+    </div>
+  </div>
+
+  <!-- Vista 3: Email -->
+  <div class="card">
+    <h2>3) Medir email (simulado)</h2>
+    <label for="subject">Asunto</label>
+    <input id="subject" type="text" placeholder="Newsletter Septiembre" value="Newsletter de prueba">
+    <label for="body">Cuerpo</label>
+    <textarea id="body" rows="6">Hola, este es un email de prueba. Incluye texto y adjuntos.</textarea>
+    <label>Adjuntos (simulados)</label>
+    <p style="font-size:13px;margin-top:4px;color:#475569">Para simular adjuntos agrega su tamaño en bytes (ej: 204800 = 200 KB)</p>
+    <div style="display:flex;gap:8px;margin-bottom:8px">
+      <input id="attach1" type="number" placeholder="bytes" style="flex:1">
+      <input id="attach2" type="number" placeholder="bytes (opcional)" style="flex:1">
+    </div>
+    <div style="margin-top:6px">
+      <button id="btnEmail">Calcular huella del email</button>
+    </div>
+    <h3>Resultado</h3>
+    <pre id="resultEmail">—</pre>
+  </div>
+
+  <script>
+    const base = 'http://localhost:3000';
+
+    // Helpers
+    function show(el, obj){
+      document.getElementById(el).textContent = JSON.stringify(obj, null, 2);
+    }
+
+    // URL
+    document.getElementById('btnUrl').addEventListener('click', async ()=>{
+      const url = document.getElementById('urlInput').value.trim();
+      const visitas = Number(document.getElementById('visitasInput').value) || 1;
+      if(!url){ alert('Ingresa una URL'); return }
+
+      try{
+        const resp = await fetch(base + '/calculate/url', {
+          method: 'POST',
+          headers: {'Content-Type': 'application/json'},
+          body: JSON.stringify({ url, visitas })
+        });
+        const json = await resp.json();
+        show('resultUrl', json);
+      }catch(e){ show('resultUrl', { error: e.message }) }
+    });
+
+    // File
+    document.getElementById('btnFile').addEventListener('click', async ()=>{
+      const input = document.getElementById('fileInput');
+      const count = Number(document.getElementById('fileCount').value) || 1;
+      if(!input.files.length){ alert('Selecciona un archivo'); return }
+      const file = input.files[0];
+
+      try{
+        const fd = new FormData();
+        fd.append('file', file);
+
+        const resp = await fetch(base + '/calculate/file', {
+          method: 'POST',
+          body: fd
+        });
+        const json = await resp.json();
+
+        // multiplicar por cantidad de envios si se pide
+        if(json && json.bytes){
+          json.cantidad = count;
+          json.co2_total_g = (json.co2_por_envio_g || json.co2_por_envio) * count;
+          json.co2_total_kg = Number(json.co2_total_g) / 1000;
+        }
+
+        show('resultFile', json);
+      }catch(e){ show('resultFile', { error: e.message }) }
+    });
+
+    // Email
+    document.getElementById('btnEmail').addEventListener('click', async ()=>{
+      const asunto = document.getElementById('subject').value || '';
+      const cuerpo = document.getElementById('body').value || '';
+      const a1 = Number(document.getElementById('attach1').value) || 0;
+      const a2 = Number(document.getElementById('attach2').value) || 0;
+
+      const body = {
+        asunto,
+        cuerpo,
+        adjuntos: []
+      };
+      if(a1) body.adjuntos.push({ name: 'adj1', bytes: a1 });
+      if(a2) body.adjuntos.push({ name: 'adj2', bytes: a2 });
+
+      try{
+        const resp = await fetch(base + '/calculate/email', {
+          method: 'POST',
+          headers: {'Content-Type': 'application/json'},
+          body: JSON.stringify(body)
+        });
+        const json = await resp.json();
+        show('resultEmail', json);
+      }catch(e){ show('resultEmail', { error: e.message }) }
+    });
+  </script>
+</body>
+</html>
