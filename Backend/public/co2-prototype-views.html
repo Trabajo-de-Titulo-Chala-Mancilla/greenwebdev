@@ -3,153 +3,387 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width,initial-scale=1" />
-  <title>CO₂ Prototype - Vistas de prueba</title>
+  <title>Digital Carbon — Dashboard provisional</title>
+
+  <!-- Chart.js -->
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
   <style>
-    body{font-family:Inter,system-ui,Segoe UI,Arial;margin:24px;background:#f7fafc;color:#111}
-    .card{background:#fff;border-radius:12px;box-shadow:0 6px 18px rgba(15,23,42,0.06);padding:18px;margin-bottom:18px}
-    h1{font-size:20px;margin-bottom:6px}
-    label{display:block;margin:8px 0 4px;font-weight:600}
-    input[type=text], input[type=number], textarea{width:100%;padding:10px;border:1px solid #e2e8f0;border-radius:8px}
-    button{padding:10px 14px;border-radius:8px;border:0;background:#0ea5a4;color:#fff;font-weight:700;cursor:pointer}
-    pre{background:#0f172a;color:#fff;padding:12px;border-radius:8px;overflow:auto}
-    .row{display:grid;grid-template-columns:1fr 1fr;gap:12px}
-    @media(max-width:760px){.row{grid-template-columns:1fr}}
+    :root{
+      --bg:#0f172a; --accent:#0ea5a4; --card:#0b1220; --muted:#94a3b8; --panel:#071023;
+      --content-bg:#f8fafc; --text-dark:#031024;
+    }
+    html,body{height:100%;margin:0;font-family:Inter,system-ui,Segoe UI,Arial;background:var(--content-bg);color:var(--text-dark)}
+    .app{display:flex;height:100vh;overflow:hidden}
+    /* sidebar */
+    .sidebar{width:260px;background:linear-gradient(180deg,var(--panel),#031827);color:#fff;padding:22px 18px;box-shadow:6px 0 24px rgba(10,20,30,0.12);display:flex;flex-direction:column;gap:12px}
+    .logo{font-weight:800;color:var(--accent);font-size:18px;margin-bottom:6px}
+    .nav{margin-top:12px;display:flex;flex-direction:column;gap:8px}
+    .nav a{color:#cfece8;text-decoration:none;padding:8px;border-radius:8px;font-size:14px}
+    .nav a.active{background:rgba(14,165,164,0.12);color:var(--accent)}
+    .muted{color:var(--muted);font-size:13px}
+    /* content */
+    .content{flex:1;padding:20px 28px;overflow:auto}
+    header{display:flex;align-items:center;justify-content:space-between;gap:12px;margin-bottom:18px}
+    .domainBox{display:flex;gap:12px;align-items:center}
+    input[type="text"]{padding:10px 12px;border-radius:8px;border:1px solid #e2e8f0;min-width:380px}
+    button{background:var(--accent);border:0;color:#fff;padding:10px 14px;border-radius:8px;font-weight:700;cursor:pointer}
+    button.ghost{background:transparent;border:1px solid #d1f2ef;color:var(--panel)}
+    .grid{display:grid;grid-template-columns:1fr 420px;gap:18px}
+    .cards{display:grid;grid-template-columns:repeat(3,1fr);gap:14px;margin-bottom:14px}
+    .card{background:#fff;border-radius:12px;padding:14px;box-shadow:0 6px 18px rgba(15,23,42,0.06)}
+    .card h3{margin:0 0 8px;color:#0f172a}
+    .big{font-size:22px;font-weight:800;color:#0f172a}
+    /* charts area */
+    .charts{display:grid;grid-template-columns:1fr;gap:14px}
+    .chartCard{background:#fff;padding:12px;border-radius:12px;box-shadow:0 6px 18px rgba(15,23,42,0.06)}
+    canvas{width:100% !important;height:280px !important}
+    table{width:100%;border-collapse:collapse}
+    table td,table th{padding:8px;border-bottom:1px solid #eef2f6;font-size:13px}
+    .footer{margin-top:18px;color:#64748b;font-size:13px}
+    @media(max-width:1000px){ .grid{grid-template-columns:1fr} .cards{grid-template-columns:1fr} }
   </style>
 </head>
 <body>
-  <div class="card">
-    <h1>CO₂ Prototype — Vistas de prueba</h1>
-    <p>3 vistas para probar localmente tu backend (sitio, archivo y email). Asegúrate de tener el servidor Express corriendo en <code>http://localhost:3000</code> y con CORS habilitado.</p>
-  </div>
+  <div class="app">
+    <!-- SIDEBAR -->
+    <aside class="sidebar">
+      <div class="logo">Digital Carbon — Provisional</div>
+      <div class="muted">Panel de control</div>
+      <nav class="nav">
+        <a class="active" href="#">Dashboard</a>
+        <a href="#">Reportes</a>
+        <a href="#">Ajustes</a>
+      </nav>
 
-  <div class="row">
-    <!-- Vista 1: URL -->
-    <div class="card">
-      <h2>1) Medir sitio web (URL)</h2>
-      <label for="urlInput">URL</label>
-      <input id="urlInput" type="text" placeholder="https://www.example.com" value="https://www.wikipedia.org">
-      <label for="visitasInput">Visitas (opcional)</label>
-      <input id="visitasInput" type="number" placeholder="1000" value="1000">
-      <div style="margin-top:10px">
-        <button id="btnUrl">Calcular huella por URL</button>
+      <div style="margin-top:auto">
+        <div class="muted">Contacto</div>
+        <div style="font-size:13px;margin-top:6px">green-web@tu-org.cl</div>
       </div>
-      <h3>Resultado</h3>
-      <pre id="resultUrl">—</pre>
-    </div>
+    </aside>
 
-    <!-- Vista 2: Archivo -->
-    <div class="card">
-      <h2>2) Medir archivo (upload)</h2>
-      <label for="fileInput">Selecciona un archivo</label>
-      <input id="fileInput" type="file">
-      <label for="fileCount">Cantidad de envíos/descargas (opcional)</label>
-      <input id="fileCount" type="number" placeholder="1" value="1">
-      <div style="margin-top:10px">
-        <button id="btnFile">Subir y calcular</button>
+    <!-- CONTENT -->
+    <main class="content">
+      <header>
+        <div class="domainBox">
+          <div style="font-weight:800;font-size:18px">Vista provisional — Analizar sitio</div>
+        </div>
+        <div style="display:flex;gap:12px;align-items:center">
+          <input id="urlInput" type="text" placeholder="https://www.example.com" value="https://www.wikipedia.org" />
+          <button id="btnAnalyze">Analizar</button>
+          <button id="btnExport" style="display:none">📄 Exportar PDF</button>
+        </div>
+      </header>
+
+      <!-- CARDS SUMMARY -->
+      <section class="cards">
+        <div class="card">
+          <h3>CO₂ por visita</h3>
+          <div class="big" id="co2PerVisit">— g</div>
+          <div class="muted">Emisiones promedio por carga de página</div>
+        </div>
+
+        <div class="card">
+          <h3>CO₂ últimos 12 meses</h3>
+          <div class="big" id="co212m">— g</div>
+          <div class="muted">Suma mensual de emisiones (últimos 12 meses)</div>
+        </div>
+
+        <div class="card">
+          <h3>Ranking (demo)</h3>
+          <div class="big" id="rank">#— / —</div>
+          <div class="muted">Comparación con otros sitios</div>
+        </div>
+      </section>
+
+      <div class="grid">
+        <div>
+          <!-- Charts -->
+          <div class="charts">
+            <div class="chartCard">
+              <h3>Emisiones mensuales (últimos 12 meses)</h3>
+              <canvas id="monthlyChart"></canvas>
+            </div>
+
+            <div class="chartCard" style="display:flex;gap:14px;align-items:center">
+              <div style="flex:1">
+                <h3>Escenarios futuros (ejemplo)</h3>
+                <canvas id="scenariosChart"></canvas>
+              </div>
+              <div style="width:200px">
+                <h3>Distribución</h3>
+                <canvas id="donutChart" style="height:200px"></canvas>
+                <div style="font-size:13px;color:#64748b;margin-top:8px">Distribución estimada por tipo: Uso vs Producción</div>
+              </div>
+            </div>
+
+            <div class="chartCard">
+              <h3>Tabla de páginas (ejemplo)</h3>
+              <table>
+                <thead><tr><th>Página</th><th>g CO₂ / visita</th><th>Visitas/mes</th></tr></thead>
+                <tbody id="pagesTable">
+                  <!-- filas generadas -->
+                </tbody>
+              </table>
+            </div>
+          </div>
+        </div>
+
+        <!-- SIDEBAR RIGHT: details -->
+        <aside style="padding-left:12px">
+          <div class="card">
+            <h3>Detalles del análisis</h3>
+            <p><strong>Dominio:</strong> <span id="detailDomain">—</span></p>
+            <p><strong>Fecha:</strong> <span id="detailDate">—</span></p>
+            <p><strong>Visitas (ej):</strong> 10.000 / mes (configurable en backend)</p>
+            <hr/>
+            <h4>Comparaciones</h4>
+            <p id="comparisonText">—</p>
+          </div>
+
+          <div class="card" style="margin-top:12px">
+            <h3>Exportar reporte</h3>
+            <p class="muted">El PDF incluirá: resumen, gráficos mensuales y comparaciones (formato similar al ejemplo).</p>
+            <div style="display:flex;gap:8px;margin-top:12px">
+              <button id="btnExportNow" style="flex:1;display:none">Generar y descargar PDF</button>
+            </div>
+          </div>
+        </aside>
       </div>
-      <h3>Resultado</h3>
-      <pre id="resultFile">—</pre>
-    </div>
-  </div>
 
-  <!-- Vista 3: Email -->
-  <div class="card">
-    <h2>3) Medir email (simulado)</h2>
-    <label for="subject">Asunto</label>
-    <input id="subject" type="text" placeholder="Newsletter Septiembre" value="Newsletter de prueba">
-    <label for="body">Cuerpo</label>
-    <textarea id="body" rows="6">Hola, este es un email de prueba. Incluye texto y adjuntos.</textarea>
-    <label>Adjuntos (simulados)</label>
-    <p style="font-size:13px;margin-top:4px;color:#475569">Para simular adjuntos agrega su tamaño en bytes (ej: 204800 = 200 KB)</p>
-    <div style="display:flex;gap:8px;margin-bottom:8px">
-      <input id="attach1" type="number" placeholder="bytes" style="flex:1">
-      <input id="attach2" type="number" placeholder="bytes (opcional)" style="flex:1">
-    </div>
-    <div style="margin-top:6px">
-      <button id="btnEmail">Calcular huella del email</button>
-    </div>
-    <h3>Resultado</h3>
-    <pre id="resultEmail">—</pre>
+      <div class="footer">
+        <p>Esta es una vista provisional. Los cálculos toman como referencia el modelo de Sustainable Web Design (swd) y datos simulados cuando el backend no provee serie mensual.</p>
+      </div>
+    </main>
   </div>
 
   <script>
-    const base = 'http://localhost:3000';
+    // Config
+    const base = "http://localhost:3000";
+    const monthlyCtx = document.getElementById("monthlyChart").getContext("2d");
+    const scenariosCtx = document.getElementById("scenariosChart").getContext("2d");
+    const donutCtx = document.getElementById("donutChart").getContext("2d");
+    let monthlyChart, scenariosChart, donutChart;
+    let currentData = null;
+    const defaultVisitors = 10000;
 
-    // Helpers
-    function show(el, obj){
-      document.getElementById(el).textContent = JSON.stringify(obj, null, 2);
+    // Utilities
+    function monthsLabels(){
+      const names = ["Ene","Feb","Mar","Abr","May","Jun","Jul","Ago","Sep","Oct","Nov","Dic"];
+      const d = new Date();
+      const arr = [];
+      for(let i=11;i>=0;i--){
+        const m = new Date(d.getFullYear(), d.getMonth()-i, 1);
+        arr.push(names[m.getMonth()]);
+      }
+      return arr;
     }
 
-    // URL
-    document.getElementById('btnUrl').addEventListener('click', async ()=>{
-      const url = document.getElementById('urlInput').value.trim();
-      const visitas = Number(document.getElementById('visitasInput').value) || 1;
-      if(!url){ alert('Ingresa una URL'); return }
+    function formatNumber(n){ return Number(n).toLocaleString(); }
+
+    // Build empty charts
+    function initCharts(){
+      monthlyChart = new Chart(monthlyCtx, {
+        type: "bar",
+        data: { labels: monthsLabels(), datasets: [{label:"g CO₂", data: Array(12).fill(0), backgroundColor:"#0ea5a4"}] },
+        options: { plugins:{legend:{display:false}}, scales:{y:{beginAtZero:true}} }
+      });
+
+      scenariosChart = new Chart(scenariosCtx, {
+        type: "line",
+        data: {
+          labels: monthsLabels(),
+          datasets: [
+            {label:"Base (actual)", data:Array(12).fill(0), borderColor:"#0ea5a4", tension:0.3, fill:false},
+            {label:"+10% tráfico", data:Array(12).fill(0), borderColor:"#f59e0b", tension:0.3, fill:false},
+            {label:"-15% peso", data:Array(12).fill(0), borderColor:"#ef4444", tension:0.3, fill:false}
+          ]
+        },
+        options:{plugins:{legend:{position:"bottom"}}, scales:{y:{beginAtZero:true}}}
+      });
+
+      donutChart = new Chart(donutCtx, {
+        type: "doughnut",
+        data: { labels:["Uso","Producción"], datasets:[{data:[60,40], backgroundColor:["#0ea5a4","#60a5fa"]}] },
+        options:{plugins:{legend:{position:"bottom"}}}
+      });
+    }
+
+    initCharts();
+
+    // Analyze button
+    document.getElementById("btnAnalyze").addEventListener("click", async ()=>{
+      const url = document.getElementById("urlInput").value.trim();
+      if(!url) return alert("Ingresa una URL o dominio.");
+      document.getElementById("btnAnalyze").disabled = true;
+      document.getElementById("btnAnalyze").textContent = "Analizando...";
 
       try{
-        const resp = await fetch(base + '/calculate/url', {
-          method: 'POST',
-          headers: {'Content-Type': 'application/json'},
-          body: JSON.stringify({ url, visitas })
+        // Llamamos al backend. Backend ideally returns:
+        // { co2_por_visita_g, co2_total_g, monthly: [12 valores en gramos], pages: [{path, g, visits}], rank: {pos,total} }
+        const resp = await fetch(base + "/calculate/url", {
+          method:"POST",
+          headers:{ "Content-Type":"application/json" },
+          body: JSON.stringify({ url, visitas: defaultVisitors })
         });
-        const json = await resp.json();
-        show('resultUrl', json);
-      }catch(e){ show('resultUrl', { error: e.message }) }
-    });
 
-    // File
-    document.getElementById('btnFile').addEventListener('click', async ()=>{
-      const input = document.getElementById('fileInput');
-      const count = Number(document.getElementById('fileCount').value) || 1;
-      if(!input.files.length){ alert('Selecciona un archivo'); return }
-      const file = input.files[0];
+        let data = await resp.json();
 
-      try{
-        const fd = new FormData();
-        fd.append('file', file);
-
-        const resp = await fetch(base + '/calculate/file', {
-          method: 'POST',
-          body: fd
-        });
-        const json = await resp.json();
-
-        // multiplicar por cantidad de envios si se pide
-        if(json && json.bytes){
-          json.cantidad = count;
-          json.co2_total_g = (json.co2_por_envio_g || json.co2_por_envio) * count;
-          json.co2_total_kg = Number(json.co2_total_g) / 1000;
+        // Si el backend no devuelve serie mensual, simulamos 12 meses a partir del valor por visita.
+        if(!data.monthly || !Array.isArray(data.monthly) || data.monthly.length !== 12){
+          // generar patrón de tráfico: variaciones aleatorias +/-20%
+          const perVisit = data.co2_por_visita_g || (data.co2 && data.co2.co2 ? data.co2.co2 : 0.5);
+          const baseMonthlyVisitors = defaultVisitors;
+          const monthly = [];
+          for(let i=0;i<12;i++){
+            const factor = 0.85 + Math.random()*0.3; // 0.85 - 1.15
+            monthly.push(Number((perVisit * baseMonthlyVisitors * factor).toFixed(3)));
+          }
+          data.monthly = monthly;
         }
 
-        show('resultFile', json);
-      }catch(e){ show('resultFile', { error: e.message }) }
+        // Fill UI
+        currentData = data;
+        document.getElementById("co2PerVisit").textContent = (data.co2_por_visita_g || data.co2_por_visit || 0).toFixed(3) + " g";
+        const sum12 = data.monthly.reduce((a,b)=>a+b,0);
+        document.getElementById("co212m").textContent = sum12.toFixed(2) + " g";
+        const rankText = data.rank ? `#${data.rank.pos} / ${data.rank.total}` : "#1335 / 1506";
+        document.getElementById("rank").textContent = rankText;
+        document.getElementById("detailDomain").textContent = (new URL(url)).hostname;
+        document.getElementById("detailDate").textContent = new Date().toLocaleDateString();
+
+        // Table pages (if available)
+        const tbody = document.getElementById("pagesTable");
+        tbody.innerHTML = "";
+        if(data.pages && Array.isArray(data.pages) && data.pages.length){
+          data.pages.slice(0,8).forEach(p=>{
+            const tr = document.createElement("tr");
+            tr.innerHTML = `<td>${p.path}</td><td>${(p.g||p.co2||0).toFixed(3)}</td><td>${formatNumber(p.visits||0)}</td>`;
+            tbody.appendChild(tr);
+          });
+        } else {
+          // sample rows
+          for(let i=1;i<=6;i++){
+            const tr = document.createElement("tr");
+            tr.innerHTML = `<td>/page-${i}</td><td>${(sum12/1200*i).toFixed(3)}</td><td>${formatNumber(Math.round(defaultVisitors/6))}</td>`;
+            tbody.appendChild(tr);
+          }
+        }
+
+        // Update charts
+        updateCharts(data);
+
+        // Show export button
+        document.getElementById("btnExport").style.display = "inline-block";
+        document.getElementById("btnExportNow").style.display = "inline-block";
+
+      }catch(err){
+        alert("Error calculando huella: " + (err.message||err));
+      } finally {
+        document.getElementById("btnAnalyze").disabled = false;
+        document.getElementById("btnAnalyze").textContent = "Analizar";
+      }
     });
 
-    // Email
-    document.getElementById('btnEmail').addEventListener('click', async ()=>{
-      const asunto = document.getElementById('subject').value || '';
-      const cuerpo = document.getElementById('body').value || '';
-      const a1 = Number(document.getElementById('attach1').value) || 0;
-      const a2 = Number(document.getElementById('attach2').value) || 0;
+    function updateCharts(data){
+      const months = monthsLabels();
+      // monthly chart
+      monthlyChart.data.labels = months;
+      monthlyChart.data.datasets[0].data = data.monthly.map(v => Number(v.toFixed(3)));
+      monthlyChart.update();
 
-      const body = {
-        asunto,
-        cuerpo,
-        adjuntos: []
-      };
-      if(a1) body.adjuntos.push({ name: 'adj1', bytes: a1 });
-      if(a2) body.adjuntos.push({ name: 'adj2', bytes: a2 });
+      // scenarios chart
+      const base = data.monthly;
+      const plus10 = base.map(v => Number((v*1.1).toFixed(3)));
+      const minus15 = base.map(v => Number((v*0.85).toFixed(3)));
+      scenariosChart.data.labels = months;
+      scenariosChart.data.datasets[0].data = base;
+      scenariosChart.data.datasets[1].data = plus10;
+      scenariosChart.data.datasets[2].data = minus15;
+      scenariosChart.update();
+
+      // donut: estimate distribution
+      const totalUsage = base.reduce((a,b)=>a+b,0);
+      const production = totalUsage * 0.35; // ejemplo heuristic
+      donutChart.data.datasets[0].data = [totalUsage, production];
+      donutChart.update();
+
+      // comparison text
+      const gramsYear = (base.reduce((a,b)=>a+b,0)/1000).toFixed(2); // kg
+      const comp = `${gramsYear} kg CO₂e (últimos 12 meses). Equiv. aprox a ${Math.round(gramsYear*0.12)} smartphones cargados (ejemplo).`;
+      document.getElementById("comparisonText").textContent = comp;
+    }
+
+    // EXPORT PDF: capture charts as images and POST to backend
+    async function exportPdf(){
+      if(!currentData) return alert("Primero realiza el análisis.");
+      document.getElementById("btnExport").disabled = true;
+      document.getElementById("btnExport").textContent = "Generando PDF...";
 
       try{
-        const resp = await fetch(base + '/calculate/email', {
-          method: 'POST',
-          headers: {'Content-Type': 'application/json'},
-          body: JSON.stringify(body)
+        // capture canvases
+        const monthlyDataURL = document.getElementById("monthlyChart").toDataURL("image/png");
+        const scenariosDataURL = document.getElementById("scenariosChart").toDataURL("image/png");
+        const donutDataURL = document.getElementById("donutChart").toDataURL("image/png");
+
+        const payload = {
+          domain: (new URL(document.getElementById("urlInput").value)).hostname,
+          summary: {
+            per_visit_g: currentData.co2_por_visita_g || 0,
+            total_12m_g: currentData.monthly.reduce((a,b)=>a+b,0),
+            rank: currentData.rank || { pos: 1335, total:1506 }
+          },
+          monthly: currentData.monthly,
+          pages: currentData.pages || [],
+          charts: {
+            monthlyChart: monthlyDataURL,
+            scenariosChart: scenariosDataURL,
+            donutChart: donutDataURL
+          }
+        };
+
+        // POST to backend, expect PDF blob
+        const resp = await fetch(base + "/report/pdf", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify(payload)
         });
-        const json = await resp.json();
-        show('resultEmail', json);
-      }catch(e){ show('resultEmail', { error: e.message }) }
-    });
+
+        if(!resp.ok) throw new Error("Error del servidor al generar PDF");
+
+        const blob = await resp.blob();
+        const url = window.URL.createObjectURL(blob);
+        const a = document.createElement("a");
+        a.href = url;
+        a.download = `report_${payload.domain}.pdf`;
+        document.body.appendChild(a);
+        a.click();
+        a.remove();
+        window.URL.revokeObjectURL(url);
+
+      }catch(e){
+        alert("Error generando PDF: " + (e.message || e));
+      } finally {
+        document.getElementById("btnExport").disabled = false;
+        document.getElementById("btnExport").textContent = "📄 Exportar PDF";
+      }
+    }
+
+    // hook export buttons
+    document.getElementById("btnExport").addEventListener("click", exportPdf);
+    document.getElementById("btnExportNow").addEventListener("click", exportPdf);
+
+    // helper months for labels
+    function monthsLabels(){
+      const names = ["Ene","Feb","Mar","Abr","May","Jun","Jul","Ago","Sep","Oct","Nov","Dic"];
+      const d = new Date();
+      const arr = [];
+      for(let i=11;i>=0;i--){
+        const m = new Date(d.getFullYear(), d.getMonth()-i, 1);
+        arr.push(names[m.getMonth()]);
+      }
+      return arr;
+    }
   </script>
 </body>
 </html>

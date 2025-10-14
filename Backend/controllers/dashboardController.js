@@ -1,6 +1,6 @@
 const { calculateCO2FromBytes } = require("../services/co2Service");
 
-// Simulación de datos para demo
+
 const visitasSimuladas = 10000;
 const archivosSimulados = [
   { name: "promo.pdf", bytes: 102400 },
@@ -12,21 +12,21 @@ const emailsSimulados = [
 
 exports.getDashboardData = (req, res) => {
   try {
-    // Emisiones por uso
-    const co2PorVisita = calculateCO2FromBytes(150000); // ejemplo tamaño página 150 KB
+    
+    const co2PorVisita = calculateCO2FromBytes(150000); 
     const emisionesUso = {
       visitas: visitasSimuladas,
       co2_total_g: co2PorVisita * visitasSimuladas,
       co2_total_kg: (co2PorVisita * visitasSimuladas) / 1000
     };
 
-    // Emisiones por producción (archivos)
+    
     const archivos = archivosSimulados.map(f => {
       const g = calculateCO2FromBytes(f.bytes);
       return { nombre: f.name, bytes: f.bytes, co2_g: g, co2_kg: g / 1000 };
     });
 
-    // Emisiones por emails
+    
     const emails = emailsSimulados.map(e => {
       let totalBytes = Buffer.byteLength(e.asunto + e.cuerpo, "utf8");
       e.adjuntos.forEach(a => { totalBytes += a.bytes || 0; });
