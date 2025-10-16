@@ -1,5 +1,5 @@
 const axios = require("axios");
-const { co2 } = require("@tgwf/co2"); // asegúrate de tener co2.js instalada
+const { co2 } = require("@tgwf/co2"); 
 
 exports.calculateUrlCO2 = async (req, res) => {
   try {
