@@ -13,7 +13,7 @@ app.use(express.json({ limit: "15mb" }));
 app.use(express.urlencoded({ extended: true })); 
 
 
-app.use(express.static(path.join(__dirname, "public")));
+//app.use(express.static(path.join(__dirname, "public")));
 
 
 app.use("/calculate/url", urlRoutes);
