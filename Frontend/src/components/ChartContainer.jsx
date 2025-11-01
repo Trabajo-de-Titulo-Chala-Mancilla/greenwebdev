@@ -1,7 +1,7 @@
+// src/components/ChartContainer.jsx
+
 import React from 'react';
-// Importamos los componentes de gráfico específicos
 import { Bar, Line, Doughnut } from 'react-chartjs-2';
-// Hay que registrar los elementos de Chart.js
 import {
   Chart as ChartJS,
   CategoryScale,
@@ -19,7 +19,7 @@ ChartJS.register(
   CategoryScale, LinearScale, BarElement, LineElement, PointElement, ArcElement, Title, Tooltip, Legend
 );
 
-// --- Funciones Helper (puedes moverlas a un archivo utils.js) ---
+// --- Funciones Helper (sin cambios) ---
 function monthsLabels() {
   const names = ["Ene", "Feb", "Mar", "Abr", "May", "Jun", "Jul", "Ago", "Sep", "Oct", "Nov", "Dic"];
   const d = new Date();
@@ -33,6 +33,87 @@ function monthsLabels() {
 function formatNumber(n) { return Number(n).toLocaleString(); }
 // -------------------------------------------------------------
 
+// --- Leemos los colores de nuestro CSS "Grow Better" ---
+const rootStyles = getComputedStyle(document.documentElement);
+const colorAccent = rootStyles.getPropertyValue('--gb-accent').trim();
+const colorTextPrimary = rootStyles.getPropertyValue('--gb-text-primary').trim();
+const colorTextSecondary = rootStyles.getPropertyValue('--gb-text-secondary').trim();
+const colorBorder = rootStyles.getPropertyValue('--gb-border').trim();
+const fontFamily = rootStyles.getPropertyValue('--font-primary').trim() || "'Montserrat', sans-serif";
+
+// --- Opciones Base para TODOS los gráficos (Modo Oscuro) ---
+const baseOptions = {
+  maintainAspectRatio: false, // Dejamos que el CSS (.chartCard) maneje el tamaño
+  plugins: {
+    legend: {
+      labels: {
+        color: colorTextSecondary, // Color de texto de leyenda
+        font: { family: fontFamily }
+      }
+    },
+    tooltip: {
+      backgroundColor: '#000',
+      titleColor: colorTextSecondary,
+      bodyColor: colorAccent,
+      borderColor: colorBorder,
+      borderWidth: 1,
+      titleFont: { family: fontFamily },
+      bodyFont: { family: fontFamily }
+    }
+  },
+  scales: {
+    x: {
+      ticks: { 
+        color: colorTextSecondary, // Color de texto eje X
+        font: { family: fontFamily } 
+      },
+      grid: { color: colorBorder } // Color de líneas grid X
+    },
+    y: {
+      ticks: { 
+        color: colorTextSecondary, // Color de texto eje Y
+        font: { family: fontFamily } 
+      },
+      grid: { color: colorBorder }, // Color de líneas grid Y
+      beginAtZero: true
+    }
+  }
+};
+
+// --- Opciones Específicas para cada gráfico ---
+// Usamos '...baseOptions' para heredar el estilo
+const barOptions = {
+  ...baseOptions,
+  plugins: {
+    ...baseOptions.plugins,
+    legend: { display: false } // Ocultamos leyenda solo para este
+  },
+};
+
+const lineOptions = {
+  ...baseOptions,
+  plugins: {
+    ...baseOptions.plugins,
+    legend: { 
+      ...baseOptions.plugins.legend,
+      position: 'bottom' // Posición específica
+    }
+  },
+};
+
+const donutOptions = {
+  maintainAspectRatio: false,
+  plugins: {
+    ...baseOptions.plugins,
+    legend: {
+      ...baseOptions.plugins.legend,
+      position: 'bottom'
+    },
+    tooltip: baseOptions.plugins.tooltip // Hereda tooltip
+  }
+};
+
+// --- Componente Principal ---
 function ChartContainer({ data, refMap }) {
   const labels = monthsLabels();
 
@@ -42,16 +123,17 @@ function ChartContainer({ data, refMap }) {
     datasets: [{
       label: "g CO₂",
       data: data.monthly.map(v => Number(v.toFixed(3))),
-      backgroundColor: "#0ea5a4"
+      backgroundColor: colorAccent // <-- CAMBIADO: Usamos variable
     }]
   };
   
   const scenariosData = {
     labels,
     datasets: [
-      { label: "Base (actual)", data: data.monthly, borderColor: "#0ea5a4", tension: 0.3, fill: false },
-      { label: "+10% tráfico", data: data.monthly.map(v => Number((v * 1.1).toFixed(3))), borderColor: "#f59e0b", tension: 0.3, fill: false },
-      { label: "-15% peso", data: data.monthly.map(v => Number((v * 0.85).toFixed(3))), borderColor: "#ef4444", tension: 0.3, fill: false }
+      // <-- CAMBIADO: Paleta de colores coherente
+      { label: "Base (actual)", data: data.monthly, borderColor: colorAccent, tension: 0.3, fill: false },
+      { label: "+10% tráfico", data: data.monthly.map(v => Number((v * 1.1).toFixed(3))), borderColor: colorTextPrimary, tension: 0.3, fill: false },
+      { label: "-15% peso", data: data.monthly.map(v => Number((v * 0.85).toFixed(3))), borderColor: colorTextSecondary, tension: 0.3, fill: false }
     ]
   };
   
@@ -61,49 +143,55 @@ function ChartContainer({ data, refMap }) {
     labels: ["Uso", "Producción"],
     datasets: [{
       data: [totalUsage, production],
-      backgroundColor: ["#0ea5a4", "#60a5fa"]
+      // <-- CAMBIADO: Paleta de colores coherente
+      backgroundColor: [colorAccent, colorTextSecondary],
+      borderColor: colorBorder // <-- AÑADIDO: Borde sutil
     }]
   };
   
-  // Datos de ejemplo para la tabla (o usa los reales si vienen)
+  // (Lógica de la tabla sin cambios)
   const pages = data.pages && data.pages.length 
     ? data.pages.slice(0, 8) 
     : Array(6).fill(0).map((_, i) => ({
         path: `/page-${i+1}`,
         g: (totalUsage / 1200 * (i+1)),
-        visits: Math.round(DEFAULT_VISITORS / 6)
+        visits: Math.round((data.summary?.visits || 10000) / 6) // Asumiendo que DEFAULT_VISITORS no existe
       }));
 
   return (
     <div className="charts">
       <div className="chartCard">
+        {/* El <h3> ya está estilizado por el CSS global */}
         <h3>Emisiones mensuales (últimos 12 meses)</h3>
-        {/* Pasamos la ref y los datos. ¡Y listo! */}
-        <Bar ref={refMap.monthly} data={monthlyData} options={{ plugins: { legend: { display: false } }, scales: { y: { beginAtZero: true } } }} />
+        {/* Usamos las nuevas opciones */}
+        <Bar ref={refMap.monthly} data={monthlyData} options={barOptions} />
       </div>
 
       <div className="chartCard" style={{ display: 'flex', gap: '14px', alignItems: 'center' }}>
-        <div style={{ flex: 1 }}>
+        <div style={{ flex: 1, minHeight: '300px' }}> {/* Damos altura mínima */}
           <h3>Escenarios futuros </h3>
-          <Line ref={refMap.scenarios} data={scenariosData} options={{ plugins: { legend: { position: "bottom" } }, scales: { y: { beginAtZero: true } } }} />
+          <Line ref={refMap.scenarios} data={scenariosData} options={lineOptions} />
         </div>
-        <div style={{ width: '200px' }}>
+        <div style={{ width: '240px' }}> {/* Más espacio para la dona */}
           <h3>Distribución</h3>
-          <Doughnut ref={refMap.donut} data={donutData} options={{ plugins: { legend: { position: "bottom" } } }} style={{ height: '200px' }} />
-          <div style={{ fontSize: '13px', color: '#64748b', marginTop: '8px' }}>Distribución estimada por tipo: Uso vs Producción</div>
+          {/* Envolvemos la dona en un div con altura */}
+          <div style={{ height: '200px', position: 'relative' }}>
+            <Doughnut ref={refMap.donut} data={donutData} options={donutOptions} />
+          </div>
+          <div style={{ fontSize: '13px', color: colorTextSecondary, marginTop: '8px' }}> {/* <-- CAMBIADO */}
+            Distribución estimada por tipo: Uso vs Producción
+          </div>
         </div>
       </div>
 
       <div className="chartCard">
         <h3>Tabla de páginas </h3>
+        {/* La tabla ya está estilizada por el CSS global */}
         <table>
           <thead>
             <tr><th>Página</th><th>g CO₂ / visita</th><th>Visitas/mes</th></tr>
           </thead>
           <tbody>
-            {/* Renderizado de listas en React: usamos .map() 
-              ¡Mucho más limpio que innerHTML!
-            */}
             {pages.map((p) => (
               <tr key={p.path}>
                 <td>{p.path}</td>
@@ -118,5 +206,4 @@ function ChartContainer({ data, refMap }) {
   );
 }
 
-// Necesario para pasar la ref correctamente
 export default ChartContainer;

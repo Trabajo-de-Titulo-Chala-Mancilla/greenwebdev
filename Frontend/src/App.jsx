@@ -81,10 +81,6 @@ function App() {
             </>
           )}
         </div>
-        
-        <div className="footer">
-          <p>Esta es una vista provisional. ...</p>
-        </div>
       </main>
     </div>
   );

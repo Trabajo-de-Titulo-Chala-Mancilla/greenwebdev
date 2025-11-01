@@ -18,13 +18,6 @@ function Header({ url, onUrlChange, onAnalyze, isLoading, showExportButton, onEx
         <button id="btnAnalyze" onClick={onAnalyze} disabled={isLoading}>
           {isLoading ? 'Analizando...' : 'Analizar'}
         </button>
-
-        {/* Renderizado Condicional: solo se muestra si showExportButton es true */}
-        {showExportButton && (
-          <button id="btnExport" onClick={onExport} disabled={isExporting}>
-            {isExporting ? 'Generando...' : '📄 Exportar PDF'}
-          </button>
-        )}
       </div>
     </header>
   );

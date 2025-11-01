@@ -1,19 +1,30 @@
+/* --- INICIO DEL ARCHIVO CSS MODIFICADO --- */
+
+/* Importar la fuente recomendada (Montserrat) */
+@import url('https://fonts.googleapis.com/css2?family=Montserrat:wght@400;700;800&display=swap');
+
+/* Variables de Color (Tema "Grow Better")
+  Hechas desde cero para el nuevo estilo.
+*/
 :root {
-  --bg: #0f172a;
-  --accent: #0ea5a4;
-  --card: #0b1220;
-  --muted: #94a3b8;
-  --panel: #071023;
-  --content-bg: #f8fafc;
-  --text-dark: #031024;
+  --gb-bg: #000000;          /* Fondo principal (Negro) */
+  --gb-panel: #111111;       /* Fondo para Sidebar (Casi Negro) */
+  --gb-surface: #1a1a1a;     /* Fondo para Tarjetas e Inputs (Gris Oscuro) */
+  --gb-accent: #0ea5a4;       /* Tu acento original (¡es perfecto!) */
+  --gb-border: #333333;      /* Borde sutil para modo oscuro */
+  --gb-text-primary: #FFFFFF;    /* Texto principal (Blanco) */
+  --gb-text-secondary: #94a3b8; /* Texto secundario/muted */
+  --font-primary: 'Montserrat', sans-serif; /* <-- Añadido para los gráficos */
 }
 
 html, body {
   height: 100%;
   margin: 0;
-  font-family: Inter, system-ui, Segoe UI, Arial;
-  background: var(--content-bg);
-  color: var(--text-dark);
+  /* Usamos Montserrat como fuente principal, como la de "Grow Better" */
+  font-family: var(--font-primary), Inter, system-ui, Segoe UI, Arial, sans-serif;
+  /* Aplicamos el fondo y texto base del modo oscuro */
+  background: var(--gb-bg);
+  color: var(--gb-text-primary);
 }
 
 .app {
@@ -22,50 +33,58 @@ html, body {
   overflow: hidden;
 }
 
-/* SIDEBAR */
+/* --- SIDEBAR (MODIFICADO) --- */
 .sidebar {
   width: 260px;
-  background: linear-gradient(180deg, var(--panel), #031827);
-  color: #fff;
+  background: var(--gb-panel); 
+  color: var(--gb-text-primary);
   padding: 22px 18px;
-  box-shadow: 6px 0 24px rgba(10, 20, 30, 0.12);
+  box-shadow: none;
+  border-right: 1px solid var(--gb-border);
   display: flex;
   flex-direction: column;
-  gap: 12px;
+  /* Eliminamos el gap global */
+  justify-content: space-between; /* ¡Esta es la clave! */
+  height: 100vh; /* Asegura que ocupe toda la altura */
 }
 .logo {
   font-weight: 800;
-  color: var(--accent);
+  color: var(--gb-accent);
   font-size: 18px;
   margin-bottom: 6px;
+  /* (Este .logo ya no se usa, ahora es .sidebar-logo) */
 }
 .nav {
-  margin-top: 12px;
+  margin-top: 0; /* ¡Modificado! Quitamos el margen superior */
   display: flex;
   flex-direction: column;
   gap: 8px;
 }
 .nav a {
-  color: #cfece8;
+  /* Usamos el color de texto secundario */
+  color: var(--gb-text-secondary);
   text-decoration: none;
   padding: 8px;
   border-radius: 8px;
   font-size: 14px;
+  font-weight: 700; /* Damos más peso a la navegación */
 }
 .nav a.active {
+  /* Tu estilo activo es genial, lo mantenemos */
   background: rgba(14, 165, 164, 0.12);
-  color: var(--accent);
+  color: var(--gb-accent);
 }
 .muted {
-  color: var(--muted);
+  color: var(--gb-text-secondary);
   font-size: 13px;
 }
 
-/* CONTENT */
+/* --- CONTENT --- */
 .content {
   flex: 1;
   padding: 20px 28px;
   overflow: auto;
+  /* Hereda el fondo negro de <body> */
 }
 header {
   display: flex;
@@ -82,28 +101,40 @@ header {
 input[type="text"] {
   padding: 10px 12px;
   border-radius: 8px;
-  border: 1px solid #e2e8f0;
+  /* Estilos dark mode para input */
+  background: var(--gb-surface);
+  border: 1px solid var(--gb-border);
+  color: var(--gb-text-primary);
   min-width: 380px;
 }
+input[type="text"]:focus {
+  /* Resaltar con acento al hacer foco */
+  border-color: var(--gb-accent);
+  outline: none;
+}
 button {
-  background: var(--accent);
+  background: var(--gb-accent);
   border: 0;
-  color: #fff;
+  /* ¡Importante! Texto negro para contraste, como en la web de Grow Better */
+  color: #000000; 
   padding: 10px 14px;
   border-radius: 8px;
   font-weight: 700;
   cursor: pointer;
+  text-transform: uppercase; /* Estilo de botón de agencia */
 }
 button.ghost {
   background: transparent;
-  border: 1px solid #d1f2ef;
-  color: var(--panel);
+  border: 1px solid var(--gb-accent);
+  color: var(--gb-accent);
 }
 .grid {
   display: grid;
   grid-template-columns: 1fr 420px;
   gap: 18px;
 }
+
+/* --- TARJETAS DE DATOS --- */
 .cards {
   display: grid;
   grid-template-columns: repeat(3, 1fr);
@@ -111,57 +142,76 @@ button.ghost {
   margin-bottom: 14px;
 }
 .card {
-  background: #fff;
+  /* Fondo de tarjeta "surface" */
+  background: var(--gb-surface);
   border-radius: 12px;
   padding: 14px;
-  box-shadow: 0 6px 18px rgba(15, 23, 42, 0.06);
+  /* Sombra no se ve, usamos borde */
+  box-shadow: none; 
+  border: 1px solid var(--gb-border);
 }
 .card h3 {
   margin: 0 0 8px;
-  color: #0f172a;
+  /* Título de tarjeta en mayúsculas y color secundario */
+  color: var(--gb-text-secondary);
+  font-size: 12px;
+  font-weight: 700;
+  text-transform: uppercase;
 }
 .big {
+  /* El dato principal va en color acento */
   font-size: 22px;
   font-weight: 800;
-  color: #0f172a;
+  color: var(--gb-accent);
 }
 
-/* CHARTS */
+/* --- CHARTS --- */
 .charts {
   display: grid;
   grid-template-columns: 1fr;
   gap: 14px;
 }
 .chartCard {
-  background: #fff;
+  /* Mismo estilo de tarjeta */
+  background: var(--gb-surface);
   padding: 12px;
   border-radius: 12px;
-  box-shadow: 0 6px 18px rgba(15, 23, 42, 0.06);
+  box-shadow: none;
+  border: 1px solid var(--gb-border);
 }
 canvas {
   width: 100% !important;
   height: 280px !important;
+  /* (Deberás configurar los colores de Chart.js 
+     para usar --gb-accent y --gb-text-secondary) */
 }
 
-/* TABLE */
+/* --- TABLE --- */
 table {
   width: 100%;
   border-collapse: collapse;
 }
 table td, table th {
   padding: 8px;
-  border-bottom: 1px solid #eef2f6;
+  /* Borde oscuro */
+  border-bottom: 1px solid var(--gb-border);
   font-size: 13px;
+  text-align: left; /* Alineación limpia */
+}
+table th {
+  color: var(--gb-text-secondary);
+  text-transform: uppercase;
+  font-size: 11px;
 }
 
-/* FOOTER */
+/* --- FOOTER --- */
 .footer {
   margin-top: 18px;
-  color: #64748b;
+  color: var(--gb-text-secondary);
   font-size: 13px;
 }
 
-/* RESPONSIVE */
+/* --- RESPONSIVE --- */
 @media (max-width: 1000px) {
   .grid {
     grid-template-columns: 1fr;
@@ -169,4 +219,54 @@ table td, table th {
   .cards {
     grid-template-columns: 1fr;
   }
+}
+
+/* --- NUEVOS ESTILOS SIDEBAR HEADER/FOOTER --- */
+.sidebar-header {
+  display: flex;
+  flex-direction: column; /* Apila el logo y el nombre */
+  align-items: center;  /* Centra horizontalmente */
+  margin-bottom: 24px;
+}
+
+.sidebar-logo {
+  width: 150px; /* Ajusta esto al tamaño del logo (símbolo XX) */
+  height: auto;
+  margin-bottom: 12px;
+}
+
+.project-name {
+  font-size: 1.1rem; /* 18px aprox */
+  font-weight: 700;
+  color: var(--gb-text-primary); /* Texto blanco */
+  margin: 0;
+}
+
+/* Pie de página del Sidebar */
+.sidebar-footer {
+  padding-top: 20px;
+  border-top: 1px solid var(--gb-border); /* Línea divisoria sutil */
+  text-align: center;
+}
+
+.social-icons {
+  display: flex;
+  justify-content: center;
+  gap: 16px; /* Espacio entre íconos */
+  margin-top: 12px;
+  margin-bottom: 16px;
+}
+
+.social-icons a {
+  color: var(--gb-text-secondary); /* Color gris muted */
+  transition: color 0.2s ease;
+}
+
+.social-icons a:hover {
+  color: var(--gb-accent); /* Resalta en verde al pasar el mouse */
+}
+
+.small-text {
+  font-size: 11px;
+  color: var(--gb-text-secondary);
 }

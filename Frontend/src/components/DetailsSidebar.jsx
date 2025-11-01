@@ -9,14 +9,20 @@ function DetailsSidebar({ url, data, onExport, isExporting }) {
   const analysisDate = new Date().toLocaleDateString();
 
   // Cálculo del texto de comparación (idéntico a tu JS original)
-  const calculateComparison = () => {
+const calculateComparison = () => {
     if (!data || !data.monthly) return '—';
     
-    const base = data.monthly;
-    const gramsYear = (base.reduce((a, b) => a + b, 0) / 1000).toFixed(2); // kg
+    // (Tuve que quitar el .toFixed(2) para que el cálculo funcione)
+    const gramsYear = (data.monthly.reduce((a, b) => a + b, 0) / 1000); // kg
     
+    const totalKgFormato = gramsYear.toFixed(2);
+    
+    // --- LA CORRECCIÓN ESTÁ AQUÍ ---
+    // Cambiamos (gramsYear * 0.12) por (gramsYear * 120)
+    const smartphones = Math.round(gramsYear * 120); 
+
     // Texto de comparación
-    return `${gramsYear} kg CO₂e (últimos 12 meses). Equiv. aprox a ${Math.round(gramsYear * 0.12)} smartphones cargados (ejemplo).`;
+    return `${totalKgFormato} kg CO₂e (últimos 12 meses). Equivalente aproximado a ${smartphones} smartphones cargados.`;
   };
 
   const comparisonText = calculateComparison();
@@ -28,7 +34,7 @@ function DetailsSidebar({ url, data, onExport, isExporting }) {
         {/* Mostramos los datos desde los props y variables */}
         <p><strong>Dominio:</strong> <span id="detailDomain">{domain}</span></p>
         <p><strong>Fecha:</strong> <span id="detailDate">{analysisDate}</span></p>
-        <p><strong>Visitas (ej):</strong> 10.000 / mes (configurable en backend)</p>
+        <p><strong>Visitas (ej):</strong> 10.000 / mes </p>
         <hr />
         <h4>Comparaciones</h4>
         <p id="comparisonText">{comparisonText}</p>

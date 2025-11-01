@@ -23,17 +23,11 @@ exports.generateReportPDF = async (req, res) => {
     doc
       .fontSize(24)
       .fillColor("#0ea5a4")
-      .text("Digital Carbon Report", { align: "center" })
+      .text("Green Web Development: Cálculadora Digital de Carbono", { align: "center" })
       .moveDown(0.5);
 
     doc
-      .fontSize(16)
-      .fillColor("#1e293b")
-      .text(`Sitio: ${domain}`, { align: "center" })
-      .moveDown(0.5);
-
-    doc
-      .fontSize(11)
+      .fontSize(20)
       .fillColor("#475569")
       .text(`Fecha del reporte: ${new Date().toLocaleDateString("es-CL")}`, {
         align: "center",
@@ -61,9 +55,6 @@ exports.generateReportPDF = async (req, res) => {
     doc.text(`• Dominio analizado: ${domain}`);
     doc.text(`• Emisiones promedio por visita: ${summary.per_visit_g.toFixed(3)} g CO₂e`);
     doc.text(`• Emisiones totales (últimos 12 meses): ${totalKg} kg CO₂e`);
-    doc.text(
-      `• Ranking estimado: #${summary.rank.pos} de ${summary.rank.total} sitios`
-    );
     doc.moveDown(1.5);
 
     // === GRÁFICOS ===
@@ -87,12 +78,12 @@ exports.generateReportPDF = async (req, res) => {
     };
 
     addChart("Emisiones mensuales (últimos 12 meses)", charts.monthlyChart);
+    doc.moveDown(1.5);
     addChart("Escenarios proyectados de emisiones", charts.scenariosChart);
-    addChart("Distribución Uso vs Producción", charts.donutChart, [300, 250]);
-
     // === TABLA DE PÁGINAS ===
     if (pages && pages.length) {
       doc.addPage();
+      addChart("Distribución Uso vs Producción", charts.donutChart, [200, 200]);
       doc.fontSize(16).fillColor("#0f172a").text("Detalle por páginas", {
         underline: true,
       });
@@ -158,7 +149,7 @@ exports.generateReportPDF = async (req, res) => {
     doc
       .fontSize(10)
       .fillColor("#64748b")
-      .text("© 2025 Green Web Dev — Prototipo académico inspirado en Digital Carbon Online", {
+      .text("© 2025 Grow Better Agency ", {
         align: "center",
       });
 
