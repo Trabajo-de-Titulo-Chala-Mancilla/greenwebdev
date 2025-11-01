@@ -1,0 +1,27 @@
+version: "3.9"
+
+services:
+  backend:
+    build: ./Backend
+    container_name: greenweb_backend
+    ports:
+      - "3000:3000"
+    environment:
+      - PORT=3000
+      - NODE_ENV=production
+    networks:
+      - greenweb_net
+
+  frontend:
+    build: ./Frontend
+    container_name: greenweb_frontend
+    ports:
+      - "5173:80"
+    depends_on:
+      - backend
+    networks:
+      - greenweb_net
+
+networks:
+  greenweb_net:
+    driver: bridge

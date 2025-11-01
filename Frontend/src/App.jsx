@@ -62,11 +62,6 @@ function App() {
             value={`${summary.co212m.toFixed(2)} g`}
             description="Suma mensual de emisiones (últimos 12 meses)"
           />
-          <SummaryCard
-            title="Ranking (demo)"
-            value={summary.rank}
-            description="Comparación con otros sitios"
-          />
         </section>
 
         <div className="grid">

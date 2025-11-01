@@ -84,7 +84,7 @@ function ChartContainer({ data, refMap }) {
 
       <div className="chartCard" style={{ display: 'flex', gap: '14px', alignItems: 'center' }}>
         <div style={{ flex: 1 }}>
-          <h3>Escenarios futuros (ejemplo)</h3>
+          <h3>Escenarios futuros </h3>
           <Line ref={refMap.scenarios} data={scenariosData} options={{ plugins: { legend: { position: "bottom" } }, scales: { y: { beginAtZero: true } } }} />
         </div>
         <div style={{ width: '200px' }}>
@@ -95,7 +95,7 @@ function ChartContainer({ data, refMap }) {
       </div>
 
       <div className="chartCard">
-        <h3>Tabla de páginas (ejemplo)</h3>
+        <h3>Tabla de páginas </h3>
         <table>
           <thead>
             <tr><th>Página</th><th>g CO₂ / visita</th><th>Visitas/mes</th></tr>
