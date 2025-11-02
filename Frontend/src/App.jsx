@@ -12,11 +12,12 @@ import DetailsSidebar from './components/DetailsSidebar';
 import { useCarbonAnalysis } from './hooks/useCarbonAnalysis';
 
 function App() {
-  // --- ESTADO DE UI (Lo único que le importa a App) ---
+  // --- ESTADO DE UI ---
   const [url, setUrl] = useState('https://www.wikipedia.org');
+  // *** CAMBIO 1: Añadir estado para visitas ***
+  const [visits, setVisits] = useState(10000);
 
   // --- REFERENCIAS (REFS) ---
-  // Las seguimos necesitando para pasarlas al hook
   const chartRefs = {
     monthly: useRef(null),
     scenarios: useRef(null),
@@ -24,7 +25,7 @@ function App() {
   };
 
   // --- HOOK PERSONALIZADO ---
-  // Le pasamos el estado y las refs, y nos devuelve TODOS los datos listos
+  // *** CAMBIO 2: Pasar 'visits' al hook ***
   const { 
     analysisData, 
     summary, 
@@ -32,11 +33,9 @@ function App() {
     isExporting, 
     analyzeUrl, 
     exportPdf 
-  } = useCarbonAnalysis(url, chartRefs);
+  } = useCarbonAnalysis(url, visits, chartRefs); // 'visits' añadido aquí
 
   // --- RENDERIZADO (JSX) ---
-  // El JSX es casi idéntico, pero ahora es mucho más "limpio"
-  // porque solo recibe props del hook.
   return (
     <div className="app">
       <Sidebar />
@@ -44,10 +43,15 @@ function App() {
         <Header
           url={url}
           onUrlChange={setUrl}
-          onAnalyze={analyzeUrl} // <-- Llama directamente a la función del hook
+          
+          // *** CAMBIO 3: Pasar props de visitas al Header ***
+          visits={visits}
+          onVisitsChange={setVisits}
+
+          onAnalyze={analyzeUrl}
           isLoading={isLoading}
           showExportButton={!!analysisData}
-          onExport={exportPdf} // <-- Llama directamente a la función del hook
+          onExport={exportPdf} 
           isExporting={isExporting}
         />
 
@@ -59,7 +63,8 @@ function App() {
           />
           <SummaryCard
             title="CO₂ últimos 12 meses"
-            value={`${summary.co212m.toFixed(2)} g`}
+            // (Este valor ahora se calculará automáticamente con las visitas)
+            value={`${summary.co212m.toFixed(2)} g`} 
             description="Suma mensual de emisiones (últimos 12 meses)"
           />
         </section>
@@ -69,11 +74,12 @@ function App() {
             <>
               <ChartContainer
                 data={analysisData}
-                // Pasamos las refs a los componentes de gráficos
                 refMap={chartRefs}
               />
               <DetailsSidebar
                 url={url}
+                // *** CAMBIO 4: Pasar 'visits' al sidebar de detalles ***
+                visits={visits} 
                 data={analysisData}
                 onExport={exportPdf}
                 isExporting={isExporting}

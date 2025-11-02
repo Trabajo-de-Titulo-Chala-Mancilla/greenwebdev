@@ -257,6 +257,11 @@ table th {
   margin-bottom: 16px;
 }
 
+.social-icons svg {
+  width: 45px;
+  height: 45px;
+}
+
 .social-icons a {
   color: var(--gb-text-secondary); /* Color gris muted */
   transition: color 0.2s ease;
