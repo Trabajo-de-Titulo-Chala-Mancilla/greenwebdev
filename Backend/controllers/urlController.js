@@ -31,12 +31,11 @@ exports.calculateUrlCO2 = async (req, res) => {
     let co2_total_g = co2_por_visita_g * visitas;
 
     // === Generar datos mensuales (12 meses) ===
-    const monthly = [];
-    for (let i = 0; i < 12; i++) {
-      const factor = 0.85 + Math.random() * 0.3; // variación 15%
-      // *** CAMBIO 4: 'visitas' se usa aquí ***
-      monthly.push(Number((co2_por_visita_g * visitas * factor).toFixed(2)));
-    }
+    const monthlyFactors = [1.05, 0.98, 1.03, 1.06, 1.10, 1.12, 1.08, 1.04, 1.00, 0.97, 0.94, 1.03];
+
+    const monthly = monthlyFactors.map(f =>
+      Number((co2_por_visita_g * visitas * f).toFixed(2))
+    );
 
     // === Datos simulados de páginas ===
     // *** CAMBIO 5: 'visitas' se usa aquí ***
