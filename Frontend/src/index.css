@@ -1,8 +1,18 @@
+@import "tailwindcss";
 
-body {
-  margin: 0;
+@theme {
+  --font-sans: "Montserrat", system-ui, "Segoe UI", sans-serif;
+  --color-canvas: #000000;
+  --color-panel: #111111;
+  --color-surface: #1a1a1a;
+  --color-line: #333333;
+  --color-accent: #0ea5a4;
+  --color-ink: #ffffff;
+  --color-muted: #a3b1c4;
 }
 
-#root {
-  height: 100vh;
+body {
+  background: var(--color-canvas);
+  color: var(--color-ink);
+  font-family: var(--font-sans);
 }

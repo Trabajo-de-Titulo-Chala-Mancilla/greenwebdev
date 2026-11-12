@@ -1,14 +1,14 @@
-version: "3.9"
-
 services:
   backend:
     build: ./Backend
     container_name: greenweb_backend
-    ports:
-      - "3000:3000"
+    init: true
     environment:
       - PORT=3000
       - NODE_ENV=production
+      - TRUST_PROXY=true
+    expose:
+      - "3000"
     networks:
       - greenweb_net
 
